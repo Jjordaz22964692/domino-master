@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RotateCw, Save, Hash, Medal, Settings, X, Edit2, User, ChevronDown, ChevronUp, AlertCircle, History, CheckCircle2, Lock, Unlock, Trophy, Trash2, Crown } from 'lucide-react';
 
-// --- UTILS & HOOKS (Persistencia de Datos) ---
+// --- UTILS & HOOKS ---
 
 const useStickyState = (defaultValue, key) => {
   const [value, setValue] = useState(() => {
@@ -43,18 +43,28 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "" }) 
   />
 );
 
-// --- VISTAS AUXILIARES (Tarjetas y Avatars) ---
+// --- VISTAS AUXILIARES (Avatar Mejorado) ---
 
-const PlayerAvatar = ({ name }) => (
-  <div className="flex flex-col items-center justify-center pointer-events-none">
-    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-200 border-2 border-slate-400 shadow-md flex items-center justify-center text-slate-800 font-bold text-xs sm:text-sm overflow-hidden">
-      {name ? name.charAt(0).toUpperCase() : '?'}
+const PlayerAvatar = ({ name, position }) => {
+  // position: 'top' | 'bottom' | 'left' | 'right'
+  const isHorizontal = position === 'left' || position === 'right';
+  
+  return (
+    <div className={`flex flex-col items-center justify-center pointer-events-none absolute ${
+      position === 'top' ? '-top-5 left-1/2 -translate-x-1/2' :
+      position === 'bottom' ? '-bottom-5 left-1/2 -translate-x-1/2' :
+      position === 'left' ? '-left-4 top-1/2 -translate-y-1/2' :
+      '-right-4 top-1/2 -translate-y-1/2'
+    }`}>
+      <div className={`w-10 h-10 rounded-full bg-slate-200 border-2 ${isHorizontal ? 'border-amber-500' : 'border-emerald-500'} shadow-lg flex items-center justify-center text-slate-900 font-bold text-sm overflow-hidden z-20`}>
+        {name ? name.charAt(0).toUpperCase() : '?'}
+      </div>
+      <span className="text-[9px] text-white font-bold bg-black/60 px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm whitespace-nowrap max-w-[80px] truncate border border-white/10 shadow-sm z-20">
+        {name || 'Jugador'}
+      </span>
     </div>
-    <span className="text-[10px] text-emerald-100 max-w-[64px] truncate mt-1 font-medium bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-sm">
-      {name || 'Jugador'}
-    </span>
-  </div>
-);
+  );
+};
 
 const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
   const isCompleted = match.isCompleted;
@@ -62,53 +72,89 @@ const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
   const score2 = scores[match.id]?.team2Score ?? '';
 
   return (
-    <div className="relative group animate-in zoom-in-95 duration-300 w-full max-w-md mx-auto">
-      <div className={`rounded-3xl border-[6px] shadow-2xl aspect-[4/3] flex flex-col relative overflow-hidden ring-1 ring-white/10 transition-all duration-500 ${isCompleted ? 'bg-emerald-900 border-emerald-600/60 grayscale-[0.2]' : 'bg-emerald-800 border-amber-900/60'}`}>
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-40 pointer-events-none"></div>
+    <div className="relative group animate-in zoom-in-95 duration-300 w-full max-w-md mx-auto my-6">
+      
+      {/* Base de la Mesa (Suelo) */}
+      <div className="bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-700 aspect-square relative">
         
-        {isCompleted && (
-          <div className="absolute inset-0 bg-black/10 pointer-events-none z-10 flex items-center justify-center">
-            <div className="bg-emerald-600/90 text-white px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase shadow-xl backdrop-blur-sm border border-emerald-400/30">Mesa Cerrada</div>
-          </div>
-        )}
+        {/* El Paño Verde (Mesa Real) */}
+        <div className={`absolute inset-8 rounded-xl shadow-inner border-4 ${isCompleted ? 'bg-emerald-900 border-emerald-700 grayscale' : 'bg-emerald-700 border-amber-800'} transition-all duration-500 overflow-visible`}>
+            
+            {/* Textura Paño */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-40 pointer-events-none rounded-lg"></div>
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-center gap-1">
-           <div className="bg-black/40 backdrop-blur-md text-white/90 border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-sm">Mesa {match.table}</div>
-           <div className="text-[9px] text-white/60 font-mono bg-black/20 px-2 rounded">Ronda {round}</div>
-        </div>
+            {/* Etiqueta Mesa Central */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 opacity-30 pointer-events-none flex flex-col items-center">
+                <div className="text-4xl font-black text-black/50 uppercase tracking-widest">Mesa</div>
+                <div className="text-6xl font-black text-black/50">{match.table}</div>
+            </div>
 
-        {/* Team 1 */}
-        <div className="flex-1 flex flex-col items-center pt-3 z-20">
-           <div className="font-bold text-white text-base drop-shadow-md mb-0.5 px-2 text-center leading-tight">{match.team1.player1} & {match.team1.player2}</div>
-           <div className="flex items-end gap-3 w-full justify-center px-2 relative">
-             <PlayerAvatar name={match.team1.player1} />
-             <input type="text" inputMode="numeric" disabled={isCompleted} className={`w-20 text-center rounded-xl py-1 text-2xl font-bold text-white placeholder:text-white/10 transition-all mx-1 mb-2 shadow-inner ${isCompleted ? 'bg-transparent border-none text-emerald-200' : 'bg-black/20 border-2 border-white/10 focus:bg-black/50 focus:outline-none focus:border-emerald-400'}`} placeholder="-" value={score1} onChange={(e) => onScoreChange(match.id, 'team1Score', e.target.value)}/>
-             <PlayerAvatar name={match.team1.player2} />
-           </div>
-        </div>
+            {/* --- JUGADORES (SENTADOS) --- */}
+            {/* Pareja 1 (Norte/Sur - Vertical) */}
+            <PlayerAvatar name={match.team1.player1} position="top" />
+            <PlayerAvatar name={match.team1.player2} position="bottom" />
 
-        <div className="h-px w-3/4 mx-auto bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"></div>
+            {/* Pareja 2 (Este/Oeste - Horizontal) */}
+            <PlayerAvatar name={match.team2.player1} position="left" />
+            <PlayerAvatar name={match.team2.player2} position="right" />
 
-        {/* Team 2 */}
-        <div className="flex-1 flex flex-col items-center justify-end pb-3 z-20">
-           <div className="flex items-start gap-3 w-full justify-center px-2 relative mb-1">
-             <PlayerAvatar name={match.team2.player1} />
-             <input type="text" inputMode="numeric" disabled={isCompleted} className={`w-20 text-center rounded-xl py-1 text-2xl font-bold text-white placeholder:text-white/10 transition-all mx-1 mt-2 shadow-inner ${isCompleted ? 'bg-transparent border-none text-emerald-200' : 'bg-black/20 border-2 border-white/10 focus:bg-black/50 focus:outline-none focus:border-emerald-400'}`} placeholder="-" value={score2} onChange={(e) => onScoreChange(match.id, 'team2Score', e.target.value)}/>
-             <PlayerAvatar name={match.team2.player2} />
-           </div>
-           <div className="font-bold text-white text-base drop-shadow-md px-2 text-center leading-tight">{match.team2.player1} & {match.team2.player2}</div>
+            {/* --- INPUTS DE PUNTUACIÓN (EN EL PAÑO) --- */}
+            <div className="absolute inset-0 flex flex-col justify-between py-12 px-8 z-10">
+                
+                {/* Input Pareja 1 (Arriba/Abajo) */}
+                <div className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider drop-shadow-md bg-black/20 px-2 rounded">Pareja 1 (N/S)</span>
+                    <input 
+                        type="text" 
+                        inputMode="numeric" 
+                        disabled={isCompleted} 
+                        className={`w-20 text-center rounded-lg py-1 text-2xl font-bold text-white placeholder:text-white/20 transition-all shadow-lg border-2 ${isCompleted ? 'bg-transparent border-none' : 'bg-black/30 border-emerald-400/50 focus:bg-black/50 focus:border-emerald-400 focus:outline-none'}`} 
+                        placeholder="0" 
+                        value={score1} 
+                        onChange={(e) => onScoreChange(match.id, 'team1Score', e.target.value)}
+                    />
+                </div>
+
+                {/* VS Divider */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-px bg-white/10"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-full bg-white/10"></div>
+
+                {/* Input Pareja 2 (Izquierda/Derecha) */}
+                <div className="flex flex-col items-center gap-1">
+                     <input 
+                        type="text" 
+                        inputMode="numeric" 
+                        disabled={isCompleted} 
+                        className={`w-20 text-center rounded-lg py-1 text-2xl font-bold text-white placeholder:text-white/20 transition-all shadow-lg border-2 ${isCompleted ? 'bg-transparent border-none' : 'bg-black/30 border-amber-500/50 focus:bg-black/50 focus:border-amber-500 focus:outline-none'}`} 
+                        placeholder="0" 
+                        value={score2} 
+                        onChange={(e) => onScoreChange(match.id, 'team2Score', e.target.value)}
+                    />
+                    <span className="text-[10px] font-bold text-amber-200 uppercase tracking-wider drop-shadow-md bg-black/20 px-2 rounded">Pareja 2 (E/O)</span>
+                </div>
+
+            </div>
+
+            {/* Overlay Cerrada */}
+            {isCompleted && (
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-lg">
+                   <Lock className="text-white/50 w-12 h-12" />
+                </div>
+            )}
         </div>
       </div>
 
-      <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-30">
-        <button onClick={() => onToggleStatus(match.id)} disabled={!isCompleted && (score1 === '' || score2 === '')} className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs shadow-lg transition-all active:scale-95 ${isCompleted ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-500' : (score1 !== '' && score2 !== '') ? 'bg-emerald-500 text-white hover:bg-emerald-400 border border-emerald-300' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}>
-          {isCompleted ? <><Unlock size={12} /> EDITAR</> : <><CheckCircle2 size={14} /> CONFIRMAR</>}
+      {/* Botón de Acción Individual Flotante */}
+      <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-40">
+        <button onClick={() => onToggleStatus(match.id)} disabled={!isCompleted && (score1 === '' || score2 === '')} className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs shadow-xl transition-all active:scale-95 transform hover:-translate-y-1 ${isCompleted ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-500' : (score1 !== '' && score2 !== '') ? 'bg-emerald-500 text-white hover:bg-emerald-400 border border-emerald-300 ring-4 ring-emerald-500/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}>
+          {isCompleted ? <><Unlock size={14} /> CORREGIR</> : <><CheckCircle2 size={16} /> CONFIRMAR RESULTADO</>}
         </button>
       </div>
     </div>
   );
 };
 
+// --- SIDEBAR (TABLA GENERAL) ---
 const ScoreSidebar = ({ teams, onUpdateHistory, round }) => {
   const [expandedTeam, setExpandedTeam] = useState(null);
   const sortedTeams = [...teams].sort((a, b) => b.totalPoints - a.totalPoints);
@@ -172,8 +218,7 @@ const ScoreSidebar = ({ teams, onUpdateHistory, round }) => {
   );
 };
 
-// --- COMPONENTES DE PANTALLAS ---
-
+// --- PANTALLA DE REGISTRO ---
 const SetupView = ({ teams, setTeams, config, setConfig, onStart }) => {
   const handleTableCountChange = (val) => {
     const count = Math.max(1, parseInt(val) || 1);
@@ -538,15 +583,66 @@ export default function DominoTournamentApp() {
     }));
   };
 
-  // --- RENDER ---
+  const SettingsModal = () => {
+    if (!isSettingsOpen) return null;
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="bg-slate-800 w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="p-4 border-b border-slate-700 flex justify-between items-center">
+            <h3 className="font-bold text-white text-lg flex items-center gap-2">
+              <Edit2 size={18} className="text-emerald-400"/> Corregir Nombres
+            </h3>
+            <button onClick={() => setIsSettingsOpen(false)} className="text-slate-400 hover:text-white p-2">
+              <X size={24} />
+            </button>
+          </div>
+          <div className="overflow-y-auto p-4 space-y-4 flex-1">
+            {teams.map((team, idx) => (
+              <div key={team.id} className="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
+                <div className="text-xs font-bold text-emerald-500 mb-2 uppercase tracking-wider">Pareja #{idx + 1}</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input 
+                    value={team.player1}
+                    onChange={(e) => {
+                      const newTeams = [...teams];
+                      newTeams[idx].player1 = e.target.value;
+                      setTeams(newTeams);
+                    }}
+                    placeholder="Jugador 1"
+                  />
+                  <Input 
+                    value={team.player2}
+                    onChange={(e) => {
+                      const newTeams = [...teams];
+                      newTeams[idx].player2 = e.target.value;
+                      setTeams(newTeams);
+                    }}
+                    placeholder="Jugador 2"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="p-4 border-t border-slate-700 bg-slate-800/50">
+            <Button onClick={() => setIsSettingsOpen(false)} className="w-full">Listo</Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="h-screen flex flex-col bg-slate-950 text-slate-200 font-sans selection:bg-emerald-500/30 overflow-hidden">
+      {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 shrink-0 h-16 z-50 shadow-lg">
         <div className="h-full px-4 lg:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-2 rounded-lg shadow-lg"><Hash className="text-white" size={20} /></div>
-            <h1 className="font-black text-xl tracking-tight text-white">Domino<span className="text-emerald-500">Master</span></h1>
+            <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-2 rounded-lg shadow-lg">
+              <Hash className="text-white" size={20} />
+            </div>
+            <h1 className="font-black text-xl tracking-tight text-white">
+              Domino<span className="text-emerald-500">Master</span>
+            </h1>
           </div>
           <div className="flex items-center gap-3">
              {step !== 'winner' && step !== 'setup' && (
@@ -555,7 +651,9 @@ export default function DominoTournamentApp() {
                </Button>
              )}
              {step !== 'setup' && step !== 'winner' && (
-               <Button variant="icon" onClick={() => setIsSettingsOpen(true)} title="Editar Nombres"><Settings size={20} /></Button>
+               <Button variant="icon" onClick={() => setIsSettingsOpen(true)} title="Editar Nombres">
+                 <Settings size={20} />
+               </Button>
              )}
              {step !== 'setup' && (
                 <Button variant="icon" onClick={resetTournament} title="Reiniciar Torneo" className="text-red-400 hover:text-red-300 bg-red-900/10 hover:bg-red-900/30 ml-2">
@@ -566,6 +664,7 @@ export default function DominoTournamentApp() {
         </div>
       </header>
 
+      {/* Layout Principal */}
       <div className="flex-1 flex overflow-hidden relative">
         <main className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth w-full">
           <div className="max-w-7xl mx-auto">
@@ -619,33 +718,21 @@ export default function DominoTournamentApp() {
         )}
       </div>
 
-      {/* Modales de Edición */}
-      {isSettingsOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-800 w-full max-w-lg rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[90vh]">
-             <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                <h3 className="font-bold text-white text-lg flex items-center gap-2"><Edit2 size={18} className="text-emerald-400"/> Corregir Nombres</h3>
-                <button onClick={() => setIsSettingsOpen(false)} className="text-slate-400 hover:text-white p-2"><X size={24} /></button>
-             </div>
-             <div className="overflow-y-auto p-4 space-y-4 flex-1">
-                {teams.map((team, idx) => (
-                   <div key={team.id} className="bg-slate-900/50 p-3 rounded-lg border border-slate-700">
-                      <div className="text-xs font-bold text-emerald-500 mb-2 uppercase tracking-wider">Pareja #{idx + 1}</div>
-                      <div className="grid grid-cols-2 gap-2">
-                         <Input value={team.player1} onChange={(e) => { const newTeams = [...teams]; newTeams[idx].player1 = e.target.value; setTeams(newTeams); }} placeholder="Jugador 1" />
-                         <Input value={team.player2} onChange={(e) => { const newTeams = [...teams]; newTeams[idx].player2 = e.target.value; setTeams(newTeams); }} placeholder="Jugador 2" />
-                      </div>
-                   </div>
-                ))}
-             </div>
-             <div className="p-4 border-t border-slate-700 bg-slate-800/50">
-                <Button onClick={() => setIsSettingsOpen(false)} className="w-full">Listo</Button>
-             </div>
+      {/* Modales y Toast */}
+      <SettingsModal />
+      {toast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-4 rounded-lg shadow-2xl border border-emerald-500/50 flex items-center gap-3 animate-in slide-in-from-bottom fade-in duration-300 z-[100] whitespace-nowrap">
+          <div className="bg-emerald-500/20 p-2 rounded-full">
+            <Save size={20} className="text-emerald-400" />
+          </div>
+          <div>
+             <p className="font-bold text-sm">Notificación</p>
+             <p className="text-xs text-slate-300">{toast}</p>
           </div>
         </div>
       )}
-
-      {toast && <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-4 rounded-lg shadow-2xl border border-emerald-500/50 flex items-center gap-3 animate-in slide-in-from-bottom fade-in duration-300 z-[100] whitespace-nowrap"><div className="bg-emerald-500/20 p-2 rounded-full"><Save size={20} className="text-emerald-400" /></div><div><p className="font-bold text-sm">Notificación</p><p className="text-xs text-slate-300">{toast}</p></div></div>}
     </div>
+  );
+}
   );
 }
