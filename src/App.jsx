@@ -200,7 +200,7 @@ const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
       {/* Mesa Base */}
       <div className="bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-slate-700 aspect-square relative z-10">
         
-        {/* -- JUGADORES -- */}
+        {/* -- JUGADORES (FUERA DEL PAÑO) -- */}
         <PlayerAvatar name={match.team1.player1} position="top" />
         <PlayerAvatar name={match.team1.player2} position="bottom" />
         <PlayerAvatar name={match.team2.player1} position="left" />
@@ -211,43 +211,41 @@ const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
             
             {/* Textura */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-40 pointer-events-none rounded-lg z-0"></div>
-            
-            {/* LOGO EN LA MESA ELIMINADO - MESA LIMPIA */}
 
-            {/* Info Mesa */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center opacity-40">
-                <div className="text-4xl font-black text-black/40 uppercase tracking-widest">Mesa</div>
-                <div className="text-6xl font-black text-black/40">{match.table}</div>
+            {/* Info Mesa (CENTRADA Y GRANDE) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center opacity-30 pointer-events-none">
+                <div className="text-3xl font-black text-black/40 uppercase tracking-widest mb-1">Mesa</div>
+                <div className="text-7xl font-black text-black/40 leading-none">{match.table}</div>
             </div>
 
-            {/* Inputs de Puntuación */}
-            <div className="absolute inset-0 flex flex-col justify-between py-14 px-10 z-10">
-                <div className="flex flex-col items-center gap-1">
+            {/* Inputs de Puntuación (Reubicados Extremos) */}
+            <div className="absolute inset-0 flex flex-col justify-between py-4 px-10 z-10 pointer-events-none">
+                {/* Pareja 1 (Arriba) */}
+                <div className="flex flex-col items-center gap-1 pointer-events-auto">
                     <span className="text-[9px] font-bold text-emerald-100 uppercase tracking-wider drop-shadow-md bg-black/30 px-2 py-0.5 rounded border border-white/10">Pareja 1 (N/S)</span>
                     <input type="text" inputMode="numeric" disabled={isCompleted} className={`w-16 text-center rounded-lg py-0.5 text-2xl font-black text-white placeholder:text-white/20 transition-all shadow-lg border-2 ${isCompleted ? 'bg-transparent border-none' : 'bg-black/40 border-emerald-400/50 focus:bg-black/60 focus:border-emerald-400 focus:outline-none'}`} placeholder="0" value={score1} onChange={(e) => onScoreChange(match.id, 'team1Score', e.target.value)} />
                 </div>
-                {/* Líneas Guía */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-px bg-white/10"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-px h-full bg-white/10"></div>
                 
-                <div className="flex flex-col items-center gap-1">
+                {/* Pareja 2 (Abajo) */}
+                <div className="flex flex-col items-center gap-1 pointer-events-auto">
                      <input type="text" inputMode="numeric" disabled={isCompleted} className={`w-16 text-center rounded-lg py-0.5 text-2xl font-black text-white placeholder:text-white/20 transition-all shadow-lg border-2 ${isCompleted ? 'bg-transparent border-none' : 'bg-black/40 border-amber-500/50 focus:bg-black/60 focus:border-amber-500 focus:outline-none'}`} placeholder="0" value={score2} onChange={(e) => onScoreChange(match.id, 'team2Score', e.target.value)} />
                     <span className="text-[9px] font-bold text-amber-100 uppercase tracking-wider drop-shadow-md bg-black/30 px-2 py-0.5 rounded border border-white/10">Pareja 2 (E/O)</span>
                 </div>
             </div>
 
+            {/* BOTÓN DE CONFIRMAR/CORREGIR (CENTRO DE LA MESA) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                <button onClick={() => onToggleStatus(match.id)} disabled={!isCompleted && (score1 === '' || score2 === '')} className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xs shadow-xl transition-all active:scale-95 transform hover:scale-105 ${isCompleted ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-500' : (score1 !== '' && score2 !== '') ? 'bg-emerald-500 text-white hover:bg-emerald-400 border border-emerald-300 ring-4 ring-emerald-500/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}>
+                  {isCompleted ? <><Unlock size={14} /> CORREGIR</> : <><CheckCircle2 size={16} /> CONFIRMAR</>}
+                </button>
+            </div>
+
             {isCompleted && (
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-lg">
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-30 flex items-center justify-center rounded-lg pointer-events-none">
                    <Lock className="text-white/50 w-12 h-12" />
                 </div>
             )}
         </div>
-      </div>
-
-      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-40 w-full flex justify-center">
-        <button onClick={() => onToggleStatus(match.id)} disabled={!isCompleted && (score1 === '' || score2 === '')} className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xs shadow-xl transition-all active:scale-95 transform hover:-translate-y-1 ${isCompleted ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-500' : (score1 !== '' && score2 !== '') ? 'bg-emerald-500 text-white hover:bg-emerald-400 border border-emerald-300 ring-4 ring-emerald-500/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}>
-          {isCompleted ? <><Unlock size={14} /> CORREGIR</> : <><CheckCircle2 size={16} /> CONFIRMAR RESULTADO</>}
-        </button>
       </div>
     </div>
   );
@@ -411,8 +409,8 @@ const ActiveRoundView = ({ round, matches, scores, onScoreChange, onToggleStatus
           {timerState && <CountdownTimer secondsRemaining={timerState.secondsRemaining} isRunning={timerState.isRunning} onToggle={onToggleTimer} soundEnabled={soundEnabled} />}
         </div>
       </div>
-      {/* AJUSTADO EL GAP PARA EQUILIBRAR EL ESPACIO */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 md:gap-12 justify-items-center pt-4">
+      {/* ESPACIADO DE REJILLA AUMENTADO SIGNIFICATIVAMENTE PARA EVITAR SUPERPOSICIÓN */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-20 md:gap-32 justify-items-center pt-8">
         {matches.map((match) => (
           <TableCard key={match.id} match={match} round={round} scores={scores} onScoreChange={onScoreChange} onToggleStatus={onToggleStatus} />
         ))}
