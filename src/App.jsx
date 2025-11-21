@@ -115,12 +115,12 @@ const PlayerAvatar = ({ name, position }) => {
     position === 'right' ? '-rotate-90' :
     'rotate-0';
 
-  // Posicionamiento relativo al borde de la mesa
+  // Posicionamiento relativo al borde de la mesa (UNIFORME PARA TODOS)
   const positionClass = 
-    position === 'top' ? '-top-8 left-1/2 -translate-x-1/2' :
-    position === 'bottom' ? '-bottom-8 left-1/2 -translate-x-1/2' :
-    position === 'left' ? '-left-8 top-1/2 -translate-y-1/2' :
-    '-right-8 top-1/2 -translate-y-1/2';
+    position === 'top' ? '-top-12 left-1/2 -translate-x-1/2' :
+    position === 'bottom' ? '-bottom-12 left-1/2 -translate-x-1/2' :
+    position === 'left' ? '-left-12 top-1/2 -translate-y-1/2' :
+    '-right-12 top-1/2 -translate-y-1/2';
 
   const nameTagClass = 
     position === 'top' ? 'mb-2 order-first' : 
@@ -196,8 +196,7 @@ const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
   const score2 = scores[match.id]?.team2Score ?? '';
 
   return (
-    // AÑADIDO px-14 PARA CREAR ESPACIO DE SEGURIDAD LATERAL
-    <div className="relative group animate-in zoom-in-95 duration-300 w-full max-w-md mx-auto my-8 px-14 py-8">
+    <div className="relative group animate-in zoom-in-95 duration-300 w-full max-w-md mx-auto m-4">
       {/* Mesa Base */}
       <div className="bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-slate-700 aspect-square relative z-10">
         
@@ -213,10 +212,7 @@ const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
             {/* Textura */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-40 pointer-events-none rounded-lg z-0"></div>
             
-            {/* LOGO MARCA DE AGUA (ESQUINA INFERIOR DERECHA) */}
-            <div className="absolute bottom-3 right-3 z-0 opacity-25 pointer-events-none">
-               <img src="/logo.png" alt="Logo" className="w-24 h-24 object-contain mix-blend-overlay transform rotate-0" />
-            </div>
+            {/* LOGO EN LA MESA ELIMINADO - MESA LIMPIA */}
 
             {/* Info Mesa */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center opacity-40">
@@ -415,8 +411,8 @@ const ActiveRoundView = ({ round, matches, scores, onScoreChange, onToggleStatus
           {timerState && <CountdownTimer secondsRemaining={timerState.secondsRemaining} isRunning={timerState.isRunning} onToggle={onToggleTimer} soundEnabled={soundEnabled} />}
         </div>
       </div>
-      {/* AUMENTADO EL GAP PARA EVITAR SOLAPAMIENTO */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-x-12 gap-y-24 justify-items-center pt-4">
+      {/* AJUSTADO EL GAP PARA EQUILIBRAR EL ESPACIO */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 md:gap-12 justify-items-center pt-4">
         {matches.map((match) => (
           <TableCard key={match.id} match={match} round={round} scores={scores} onScoreChange={onScoreChange} onToggleStatus={onToggleStatus} />
         ))}
