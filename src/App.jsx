@@ -109,7 +109,6 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
 const PlayerAvatar = ({ name, position }) => {
   const isHorizontal = position === 'left' || position === 'right';
   
-  // Rotación de la silueta
   const rotationClass = 
     position === 'top' ? 'rotate-180' :
     position === 'left' ? 'rotate-90' :
@@ -117,7 +116,6 @@ const PlayerAvatar = ({ name, position }) => {
     'rotate-0';
 
   // Posicionamiento relativo al borde de la mesa
-  // Usamos translate para centrarlos exactamente en el borde
   const positionClass = 
     position === 'top' ? '-top-8 left-1/2 -translate-x-1/2' :
     position === 'bottom' ? '-bottom-8 left-1/2 -translate-x-1/2' :
@@ -148,7 +146,7 @@ const PlayerAvatar = ({ name, position }) => {
   );
 };
 
-// --- CRONÓMETRO ---
+// --- CRONÓMETRO INTELIGENTE ---
 const CountdownTimer = ({ secondsRemaining, isRunning, onToggle, soundEnabled }) => {
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60);
@@ -198,26 +196,26 @@ const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
   const score2 = scores[match.id]?.team2Score ?? '';
 
   return (
-    <div className="relative group animate-in zoom-in-95 duration-300 w-full max-w-md mx-auto my-16">
+    // AÑADIDO px-14 PARA CREAR ESPACIO DE SEGURIDAD LATERAL
+    <div className="relative group animate-in zoom-in-95 duration-300 w-full max-w-md mx-auto my-8 px-14 py-8">
       {/* Mesa Base */}
       <div className="bg-slate-800/90 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-slate-700 aspect-square relative z-10">
         
-        {/* -- JUGADORES AHORA SON HIJOS DIRECTOS DE LA MESA BASE, NO DEL PAÑO -- */}
-        {/* Esto evita que el overflow-hidden del paño los corte */}
+        {/* -- JUGADORES -- */}
         <PlayerAvatar name={match.team1.player1} position="top" />
         <PlayerAvatar name={match.team1.player2} position="bottom" />
         <PlayerAvatar name={match.team2.player1} position="left" />
         <PlayerAvatar name={match.team2.player2} position="right" />
 
-        {/* Paño Verde (Con overflow hidden para textura y logo) */}
+        {/* Paño Verde */}
         <div className={`absolute inset-8 rounded-xl shadow-inner border-4 ${isCompleted ? 'bg-emerald-900 border-emerald-700 grayscale' : 'bg-emerald-700 border-amber-800'} transition-all duration-500 overflow-hidden z-0`}>
             
             {/* Textura */}
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-40 pointer-events-none rounded-lg z-0"></div>
             
-            {/* Logo Marca de Agua */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-20">
-               <img src="/logo.png" alt="Logo" className="w-3/4 h-3/4 object-contain mix-blend-overlay" />
+            {/* LOGO MARCA DE AGUA (ESQUINA INFERIOR DERECHA) */}
+            <div className="absolute bottom-3 right-3 z-0 opacity-25 pointer-events-none">
+               <img src="/logo.png" alt="Logo" className="w-24 h-24 object-contain mix-blend-overlay transform rotate-0" />
             </div>
 
             {/* Info Mesa */}
@@ -250,7 +248,7 @@ const TableCard = ({ match, round, scores, onScoreChange, onToggleStatus }) => {
         </div>
       </div>
 
-      <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 z-40 w-full flex justify-center">
+      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-40 w-full flex justify-center">
         <button onClick={() => onToggleStatus(match.id)} disabled={!isCompleted && (score1 === '' || score2 === '')} className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xs shadow-xl transition-all active:scale-95 transform hover:-translate-y-1 ${isCompleted ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-500' : (score1 !== '' && score2 !== '') ? 'bg-emerald-500 text-white hover:bg-emerald-400 border border-emerald-300 ring-4 ring-emerald-500/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'}`}>
           {isCompleted ? <><Unlock size={14} /> CORREGIR</> : <><CheckCircle2 size={16} /> CONFIRMAR RESULTADO</>}
         </button>
@@ -417,7 +415,8 @@ const ActiveRoundView = ({ round, matches, scores, onScoreChange, onToggleStatus
           {timerState && <CountdownTimer secondsRemaining={timerState.secondsRemaining} isRunning={timerState.isRunning} onToggle={onToggleTimer} soundEnabled={soundEnabled} />}
         </div>
       </div>
-      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-x-8 gap-y-24 justify-items-center pt-4">
+      {/* AUMENTADO EL GAP PARA EVITAR SOLAPAMIENTO */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-x-12 gap-y-24 justify-items-center pt-4">
         {matches.map((match) => (
           <TableCard key={match.id} match={match} round={round} scores={scores} onScoreChange={onScoreChange} onToggleStatus={onToggleStatus} />
         ))}
